@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import config from "./config";
 import * as commandsModules from "./commands";
+import { transactionTracker } from "./watcher";
 
 console.log("Bot is starting...");
 
@@ -9,6 +10,7 @@ const commands = Object(commandsModules);
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once("ready", () => {
+  transactionTracker(client);
   console.log("Alive");
 });
 
