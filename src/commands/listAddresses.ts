@@ -1,7 +1,7 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
-  .setName("List Address")
+  .setName("list")
   .setDescription("List address");
 
 export async function execute(interaction: CommandInteraction) {
