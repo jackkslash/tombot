@@ -13,7 +13,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once("ready", async () => {
   await mongoose.connect(config.MONGODB);
   console.log("DB connected");
-  transactionTracker(client);
+  //transactionTracker(client);
   console.log("Alive");
 });
 

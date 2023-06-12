@@ -1,9 +1,18 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Address } from "../models/Address";
 
 export const data = new SlashCommandBuilder()
-  .setName("Remove Address")
-  .setDescription("Remove address");
+  .setName("remove")
+  .setDescription("Remove address")
+  .addStringOption((option) =>
+    option
+      .setName("address")
+      .setDescription("The address of the wallet.")
+      .setRequired(true)
+  );
 
-export async function execute(interaction: CommandInteraction) {
-  return interaction.reply("test");
+export async function execute(interaction: any) {
+  const add = interaction.options.getString("address");
+  await Address.findOneAndDelete({ address: add });
+  return interaction.reply(add + "was deleted.");
 }
