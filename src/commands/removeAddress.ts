@@ -13,6 +13,13 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: any) {
   const add = interaction.options.getString("address");
-  await Address.findOneAndDelete({ address: add });
+  await Address.findOneAndUpdate(
+    { address: add },
+    {
+      $pull: {
+        address: add,
+      },
+    }
+  );
   return interaction.reply(add + "was deleted.");
 }
