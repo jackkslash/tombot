@@ -1,6 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { Address } from "../models/Address";
-import { add } from ".";
 
 export const data = new SlashCommandBuilder()
   .setName("list")

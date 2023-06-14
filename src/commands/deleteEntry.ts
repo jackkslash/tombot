@@ -3,7 +3,7 @@ import { Address } from "../models/Address";
 
 export const data = new SlashCommandBuilder()
   .setName("purge")
-  .setDescription("Remove enitre entry")
+  .setDescription("Remove entire entry")
   .addStringOption((option) =>
     option
       .setName("label")
