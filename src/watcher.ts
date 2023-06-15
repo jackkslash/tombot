@@ -1,10 +1,9 @@
 import { ethers } from "ethers";
 import ABI from "./abi/ERC20ABI.json";
 import { Address } from "./models/Address";
-import { formatBytes32String } from "ethers/lib/utils";
+import config from "./config";
 
-const NODE_URL = "https://ethereum-mainnet-rpc.allthatnode.com";
-const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+const provider = new ethers.providers.JsonRpcProvider(config.RPCURL);
 const utils = ethers.utils;
 
 //jing1 - 0x15c92560b75dae892d6be088a0249f967b6a93fd
