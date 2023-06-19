@@ -1,7 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
-const { CLIENTID, GUILDID, DISCORDBOTTOKEN, CHANNELID, MONGODB, RPCURL } =
-  process.env;
+const {
+  CLIENTID,
+  GUILDID,
+  DISCORDBOTTOKEN,
+  CHANNELID,
+  MONGODB,
+  RPCURL1,
+  RPCURL2,
+} = process.env;
 
 if (
   !CLIENTID ||
@@ -9,7 +16,8 @@ if (
   !DISCORDBOTTOKEN ||
   !CHANNELID ||
   !MONGODB ||
-  !RPCURL
+  !RPCURL1 ||
+  !RPCURL2
 ) {
   throw new Error("Missing .env vars");
 }
@@ -20,7 +28,8 @@ const config: Record<string, string> = {
   DISCORDBOTTOKEN,
   CHANNELID,
   MONGODB,
-  RPCURL,
+  RPCURL1,
+  RPCURL2,
 };
 
 export default config;

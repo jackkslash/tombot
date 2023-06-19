@@ -3,7 +3,40 @@ import ABI from "./abi/ERC20ABI.json";
 import { Address } from "./models/Address";
 import config from "./config";
 
-const provider = new ethers.providers.JsonRpcProvider(config.RPCURL);
+const url1 = config.RPCURL1;
+const url2 = config.RPCURL2;
+const stallTimeout = 2 * 1000;
+const options = {
+  timeout: 60 * 1000,
+  throttleLimit: 1,
+};
+const quorum = 1;
+const provider1 = new ethers.providers.StaticJsonRpcProvider({
+  url: url1,
+  ...options,
+});
+const provider2 = new ethers.providers.StaticJsonRpcProvider({
+  url: url2,
+  ...options,
+});
+
+const provider = new ethers.providers.FallbackProvider(
+  [
+    {
+      provider: provider1,
+      priority: 1,
+      weight: 1,
+      stallTimeout,
+    },
+    {
+      provider: provider2,
+      priority: 2,
+      weight: 1,
+      stallTimeout,
+    },
+  ],
+  quorum
+);
 const utils = ethers.utils;
 
 //jing1 - 0x15c92560b75dae892d6be088a0249f967b6a93fd
@@ -76,56 +109,61 @@ export function transactionTracker(client: any) {
 async function logCheck(transaction: any, Addresses: any, client: any) {
   const details = [];
   const tran = await provider.getTransactionReceipt(transaction);
-  if (
-    Addresses.includes(tran.from.toLowerCase()) ||
-    Addresses.includes(tran.to.toLowerCase())
-  ) {
-    try {
-      const log = tran.logs;
-      const sig = "Transfer(address,address,uint256)";
-      const eightbytes = utils.toUtf8Bytes(sig);
-      const keccak = utils.keccak256(eightbytes);
 
-      for (let index = 0; index < log.length; index++) {
-        if (log[index].topics[0] == keccak) {
-          //and check swap first entry
-          const contract = new ethers.Contract(
-            log[index].address,
-            ABI,
-            provider
-          );
-          const symbol = await contract.symbol();
-          const name = await contract.name();
-          const dataCoversion = utils.defaultAbiCoder
-            .decode(["uint256"], log[index].data)[0]
-            .toString();
-          const decimal = await contract.decimals();
-          const tokAm = utils.formatUnits(dataCoversion, decimal);
-          const data = {
-            token: name,
-            tokenAddress: log[index].address,
-            sym: symbol,
-            amount: tokAm,
-          };
-          details.push(data);
+  try {
+    if (
+      Addresses.includes(tran.from.toLowerCase()) ||
+      Addresses.includes(tran.to.toLowerCase())
+    ) {
+      try {
+        const log = tran.logs;
+        const sig = "Transfer(address,address,uint256)";
+        const eightbytes = utils.toUtf8Bytes(sig);
+        const keccak = utils.keccak256(eightbytes);
+
+        for (let index = 0; index < log.length; index++) {
+          if (log[index].topics[0] == keccak) {
+            //and check swap first entry
+            const contract = new ethers.Contract(
+              log[index].address,
+              ABI,
+              provider
+            );
+            const symbol = await contract.symbol();
+            const name = await contract.name();
+            const dataCoversion = utils.defaultAbiCoder
+              .decode(["uint256"], log[index].data)[0]
+              .toString();
+            const decimal = await contract.decimals();
+            const tokAm = utils.formatUnits(dataCoversion, decimal);
+            const data = {
+              token: name,
+              tokenAddress: log[index].address,
+              sym: symbol,
+              amount: tokAm,
+            };
+            details.push(data);
+          }
         }
-      }
-      const from = await Address.find({ address: tran.from.toLowerCase() });
-      console.log("----------");
-      console.log("Hash: " + tran.transactionHash);
-      console.log(
-        "Etherscan link: " + "https://etherscan.io/tx/" + tran.transactionHash
-      );
-      console.log("to: " + tran.to);
-      console.log("from " + tran.from + " : " + from[0].label);
-      details.map((token) => {
+        const from = await Address.find({ address: tran.from.toLowerCase() });
         console.log("----------");
-        console.log(token.token + ": " + token.sym);
-        console.log("Amount: " + token.amount);
-        console.log("https://dexscreener.com/ethereum/" + token.tokenAddress);
-      });
-    } catch (error) {
-      console.log("wrong transaction type");
+        console.log("Hash: " + tran.transactionHash);
+        console.log(
+          "Etherscan link: " + "https://etherscan.io/tx/" + tran.transactionHash
+        );
+        console.log("to: " + tran.to);
+        console.log("from " + tran.from + " : " + from[0].label);
+        details.map((token) => {
+          console.log("----------");
+          console.log(token.token + ": " + token.sym);
+          console.log("Amount: " + token.amount);
+          console.log("https://dexscreener.com/ethereum/" + token.tokenAddress);
+        });
+      } catch (error) {
+        console.log("wrong transaction type");
+      }
     }
+  } catch (error) {
+    console.log("null address");
   }
 }
