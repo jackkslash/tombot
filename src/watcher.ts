@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import ABI from "./abi/ERC20ABI.json";
 import { Address } from "./models/Address";
 import config from "./config";
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from "discord.js";
 
 const url1 = config.RPCURL1;
 const url2 = config.RPCURL2;
@@ -109,7 +110,6 @@ export function transactionTracker(client: any) {
 async function logCheck(transaction: any, Addresses: any, client: any) {
   const details = [];
   const tran = await provider.getTransactionReceipt(transaction);
-
   try {
     if (
       Addresses.includes(tran.from.toLowerCase()) ||
@@ -146,19 +146,46 @@ async function logCheck(transaction: any, Addresses: any, client: any) {
           }
         }
         const from = await Address.find({ address: tran.from.toLowerCase() });
-        console.log("----------");
-        console.log("Hash: " + tran.transactionHash);
-        console.log(
-          "Etherscan link: " + "https://etherscan.io/tx/" + tran.transactionHash
-        );
-        console.log("to: " + tran.to);
-        console.log("from " + tran.from + " : " + from[0].label);
-        details.map((token) => {
-          console.log("----------");
-          console.log(token.token + ": " + token.sym);
-          console.log("Amount: " + token.amount);
-          console.log("https://dexscreener.com/ethereum/" + token.tokenAddress);
-        });
+        // console.log("----------");
+        // console.log("Hash: " + tran.transactionHash);
+        // console.log(
+        //   "Etherscan link: " + "https://etherscan.io/tx/" + tran.transactionHash
+        // );
+        // console.log("to: " + tran.to);
+        // console.log("from " + tran.from + " : " + from[0].label);
+        // details.map((token) => {
+        //   console.log("----------");
+        //   console.log(token.token + ": " + token.sym);
+        //   console.log("Amount: " + token.amount);
+        //   console.log("https://dexscreener.com/ethereum/" + token.tokenAddress);
+        // });
+        const channel = client.channels.cache.get(config.CHANNELID);
+        const embed = new EmbedBuilder()
+          .setTitle(from[0].label + " made a transaction!")
+          .setURL("https://etherscan.io/tx/" + tran.transactionHash)
+          .setDescription(
+            "[" +
+              details[0].amount +
+              " " +
+              details[0].token +
+              " (" +
+              details[0].sym +
+              ") ](https://dexscreener.com/ethereum/" +
+              details[0].tokenAddress +
+              ")" +
+              "\n swapped for \n" +
+              "[" +
+              details[1].amount +
+              " " +
+              details[1].token +
+              " (" +
+              details[1].sym +
+              ") ](https://dexscreener.com/ethereum/" +
+              details[1].tokenAddress +
+              ")"
+          );
+
+        channel.send({ embeds: [embed] });
       } catch (error) {
         console.log("wrong transaction type");
       }
