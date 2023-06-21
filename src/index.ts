@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import config from "./config";
 import * as commandsModules from "./commands";
-import { transactionTracker } from "./watcher";
+import { transactionTracker, transactionTrackerTest } from "./watcher";
 import mongoose from "mongoose";
 
 console.log("Bot is starting...");
@@ -13,7 +13,8 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once("ready", async () => {
   await mongoose.connect(config.MONGODB);
   console.log("DB connected");
-  transactionTracker(client);
+  // transactionTracker(client);
+  transactionTrackerTest(client);
   console.log("Alive");
 });
 
