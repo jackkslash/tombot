@@ -7,6 +7,7 @@
     "dev": "nodemon",
     "build": "rimraf ./build && tsc",
     "deploy": "tsc && node build/deployCommands.js",
+    "wallet": "tsc && node build/walletHistory.js",
     "start": "npm run deploy && npm run build && node build/index.js"
   },
   "author": "",
