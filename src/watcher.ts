@@ -72,7 +72,7 @@ export function transactionTracker(client: any) {
 async function logCheck(transaction: any, Addresses: any, client: any) {
   const details = [];
   const tran = await provider.getTransactionReceipt(transaction);
-  try {
+  if (tran.to != null) {
     if (
       Addresses.includes(tran.from.toLowerCase()) ||
       Addresses.includes(tran.to.toLowerCase())
@@ -141,38 +141,39 @@ async function logCheck(transaction: any, Addresses: any, client: any) {
         console.log("wrong transaction type");
       }
     }
-  } catch (error) {
+  } else if (tran.to == null) {
     console.log("null address/new contract created");
   }
 }
 
 // test on hardcoded data
-// const transactions: string | any[] = [
-//   "0x8aee4d2e9df3d96202a41cb8b009f0b1d6d4d84ceb0ea9e3d8f2dfb171c5049c",
-//   "0xbf6ee7d2156f9cdade1f5970a8a65362f2a34b33d59f44724067fd25b14f86b4",
-//   "0x41ee3c8a9329c70b8f32dacc7e8bb03fae926c5bca2eee84ece1bbb754ae73b3",
-// ];
-// export async function transactionTrackerTest(client: any) {
-//   console.log("tracker active");
-//   const adds = await Address.aggregate([
-//     {
-//       $unwind: "$address",
-//     },
-//     {
-//       $group: {
-//         _id: null,
-//         address: {
-//           $addToSet: "$address",
-//         },
-//       },
-//     },
-//   ]);
-//   const Addresses = adds[0].address;
-//   try {
-//     for (let index = 0; index < transactions.length; index++) {
-//       logCheck(transactions[index], Addresses, client);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
+const transactions: string | any[] = [
+  "0x8aee4d2e9df3d96202a41cb8b009f0b1d6d4d84ceb0ea9e3d8f2dfb171c5049c",
+  "0xbf6ee7d2156f9cdade1f5970a8a65362f2a34b33d59f44724067fd25b14f86b4",
+  "0x41ee3c8a9329c70b8f32dacc7e8bb03fae926c5bca2eee84ece1bbb754ae73b3",
+  "0x2afae7763487e60b893cb57803694810e6d3d136186a6de6719921afd7ca304a",
+];
+export async function transactionTrackerTest(client: any) {
+  console.log("tracker active");
+  const adds = await Address.aggregate([
+    {
+      $unwind: "$address",
+    },
+    {
+      $group: {
+        _id: null,
+        address: {
+          $addToSet: "$address",
+        },
+      },
+    },
+  ]);
+  const Addresses = adds[0].address;
+  try {
+    for (let index = 0; index < transactions.length; index++) {
+      logCheck(transactions[index], Addresses, client);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
