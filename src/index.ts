@@ -3,6 +3,7 @@ import config from "./config";
 import * as commandsModules from "./commands";
 import { transactionTracker, transactionTrackerTest } from "./watcher";
 import mongoose from "mongoose";
+import { newPairSocket } from "./ws";
 
 console.log("Bot is starting...");
 
@@ -13,8 +14,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once("ready", async () => {
   await mongoose.connect(config.MONGODB);
   console.log("DB connected");
-  transactionTracker(client);
+  // transactionTracker(client);
   // transactionTrackerTest(client);
+  newPairSocket();
   console.log("Alive");
 });
 
