@@ -4,6 +4,7 @@ import * as commandsModules from "./commands";
 import { transactionTracker, transactionTrackerTest } from "./watcher";
 import mongoose from "mongoose";
 import { newPairSocket } from "./ws";
+import { newsWatch } from "./news";
 
 console.log("Bot is starting...");
 
@@ -16,7 +17,8 @@ client.once("ready", async () => {
   console.log("DB connected");
   // transactionTracker(client);
   // transactionTrackerTest(client);
-  newPairSocket();
+  //newPairSocket();
+  newsWatch();
   console.log("Alive");
 });
 
