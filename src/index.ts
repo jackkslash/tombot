@@ -17,8 +17,8 @@ client.once("ready", async () => {
   console.log("DB connected");
   // transactionTracker(client);
   // transactionTrackerTest(client);
-  //newPairSocket();
-  newsWatch();
+  newPairSocket(client);
+  // newsWatch();
   console.log("Alive");
 });
 

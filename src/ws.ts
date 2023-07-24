@@ -1,15 +1,67 @@
+import { ConnectionVisibility, EmbedBuilder } from "discord.js";
+import config from "./config";
 import WebSocket from "ws";
 
-export function newPairSocket() {
+export function newPairSocket(client: any) {
   // Create WebSocket connection.
-  const socket = new WebSocket("");
+  const socket = new WebSocket("wss://ws.dextools.io/");
+  const channel = client.channels.cache.get(config.CHANNELID);
+
+  const subscribe = {
+    jsonrpc: "2.0",
+    method: "subscribe",
+    params: { chain: "ether", channel: "uni:pools" },
+    id: 2,
+  };
+
   // Connection opened
   socket.addEventListener("open", (event) => {
-    socket.send("ping");
+    socket.send(JSON.stringify(subscribe));
   });
 
   // Listen for messages
-  socket.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data);
+  socket.addEventListener("message", async (event) => {
+    const data = JSON.parse(event.data.toString());
+    if (data.result.data.event == "create") {
+      console.log("Dex tools event: ", data.result.data);
+
+      const embed = new EmbedBuilder()
+        .setTitle("A new pair found!")
+        .setDescription(
+          data.result.data.pair.token0.name +
+            " " +
+            " (" +
+            data.result.data.pair.token0.symbol +
+            ") " +
+            " / " +
+            data.result.data.pair.token1.name +
+            " " +
+            " (" +
+            data.result.data.pair.token1.symbol +
+            ") \n" +
+            "\n [Dexscreener]" +
+            "(https://dexscreener.com/ethereum/" +
+            data.result.data.pair.id +
+            ")" +
+            "\n [Dextools]" +
+            "(https://www.dextools.io/app/en/ether/pair-explorer/" +
+            data.result.data.pair.id +
+            ")" +
+            "\n [Honeypot]" +
+            "(https://honeypot.is/ethereum?address=" +
+            data.result.data.pair.id +
+            ")" +
+            "\n [Defined]" +
+            "(https://www.defined.fi/eth/" +
+            data.result.data.pair.id +
+            ")" +
+            "\n [Etherscan]" +
+            "(https://etherscan.io/token/" +
+            data.result.data.pair.id +
+            ")"
+        );
+
+      channel.send({ embeds: [embed] });
+    }
   });
 }
