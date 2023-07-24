@@ -2,7 +2,7 @@ import WebSocket from "ws";
 
 export function newPairSocket() {
   // Create WebSocket connection.
-  const socket = new WebSocket("wss://news.treeofalpha.com/ws");
+  const socket = new WebSocket("");
   // Connection opened
   socket.addEventListener("open", (event) => {
     socket.send("ping");
