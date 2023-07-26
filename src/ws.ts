@@ -23,7 +23,7 @@ export function newPairSocket(client: any) {
   socket.addEventListener("message", async (event) => {
     const data = JSON.parse(event.data.toString());
     if (data.result.data.event == "create") {
-      console.log("Dex tools event: ", data.result.data);
+      console.log("Token created");
 
       const embed = new EmbedBuilder()
         .setTitle("A new pair found!")

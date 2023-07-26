@@ -8,5 +8,5 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
   const adds = await Address.find({}, { address: 1, label: 1, _id: 0 });
   console.log(adds);
-  return interaction.reply(adds + "");
+  return interaction.reply("ADMIN COMMAND! check console");
 }
