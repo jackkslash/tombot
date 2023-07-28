@@ -16,7 +16,7 @@ client.once("ready", async () => {
   await mongoose.connect(config.MONGODB);
   console.log("DB connected");
   transactionTracker(client);
-  transactionTrackerTest(client);
+  // transactionTrackerTest(client);
   newPairSocket(client);
   // newsWatch();
   console.log("Alive");

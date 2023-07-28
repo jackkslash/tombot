@@ -4,40 +4,11 @@ import { Address } from "./models/Address";
 import config from "./config";
 import { EmbedBuilder } from "discord.js";
 
-const url1 = config.RPCURL1;
-const url2 = config.RPCURL2;
-const stallTimeout = 2 * 1000;
-const options = {
-  timeout: 60 * 1000,
-  throttleLimit: 1,
-};
-const quorum = 1;
-const provider1 = new ethers.providers.StaticJsonRpcProvider({
-  url: url1,
-  ...options,
-});
-const provider2 = new ethers.providers.StaticJsonRpcProvider({
-  url: url2,
-  ...options,
-});
-
-const provider = new ethers.providers.FallbackProvider(
-  [
-    {
-      provider: provider1,
-      priority: 1,
-      weight: 1,
-      stallTimeout,
-    },
-    {
-      provider: provider2,
-      priority: 2,
-      weight: 1,
-      stallTimeout,
-    },
-  ],
-  quorum
+const provider = new ethers.providers.AlchemyProvider(
+  "homestead",
+  config.ALCAPI
 );
+
 const utils = ethers.utils;
 
 export function transactionTracker(client: any) {
@@ -70,79 +41,84 @@ export function transactionTracker(client: any) {
 }
 
 async function logCheck(transaction: any, Addresses: any, client: any) {
-  const details = [];
-  const tran = await provider.getTransactionReceipt(transaction);
-  if (tran.to != null) {
-    if (
-      Addresses.includes(tran.from.toLowerCase()) ||
-      Addresses.includes(tran.to.toLowerCase())
-    ) {
-      try {
-        const log = tran.logs;
-        const sig = "Transfer(address,address,uint256)";
-        const eightbytes = utils.toUtf8Bytes(sig);
-        const keccak = utils.keccak256(eightbytes);
+  try {
+    const details = [];
+    const tran = await provider.getTransactionReceipt(transaction);
+    if (tran.to != null) {
+      if (
+        Addresses.includes(tran.from.toLowerCase()) ||
+        Addresses.includes(tran.to.toLowerCase())
+      ) {
+        try {
+          const log = tran.logs;
+          const sig = "Transfer(address,address,uint256)";
+          const eightbytes = utils.toUtf8Bytes(sig);
+          const keccak = utils.keccak256(eightbytes);
 
-        for (let index = 0; index < log.length; index++) {
-          if (log[index].topics[0] == keccak) {
-            //and check swap first entry
-            const contract = new ethers.Contract(
-              log[index].address,
-              ABI,
-              provider
-            );
-            const symbol = await contract.symbol();
-            const name = await contract.name();
-            const dataCoversion = utils.defaultAbiCoder
-              .decode(["uint256"], log[index].data)[0]
-              .toString();
-            const decimal = await contract.decimals();
-            const tokAm = utils.formatUnits(dataCoversion, decimal);
-            const data = {
-              token: name,
-              tokenAddress: log[index].address,
-              sym: symbol,
-              amount: tokAm,
-            };
-            details.push(data);
+          for (let index = 0; index < log.length; index++) {
+            if (log[index].topics[0] == keccak) {
+              //and check swap first entry
+              const contract = new ethers.Contract(
+                log[index].address,
+                ABI,
+                provider
+              );
+              const symbol = await contract.symbol();
+              const name = await contract.name();
+              const dataCoversion = utils.defaultAbiCoder
+                .decode(["uint256"], log[index].data)[0]
+                .toString();
+              const decimal = await contract.decimals();
+              const tokAm = utils.formatUnits(dataCoversion, decimal);
+              const data = {
+                token: name,
+                tokenAddress: log[index].address,
+                sym: symbol,
+                amount: tokAm,
+              };
+              details.push(data);
+            }
           }
-        }
 
-        //create embed of trasaction
-        const from = await Address.find({ address: tran.from.toLowerCase() });
-        const channel = client.channels.cache.get(config.CHANNELID);
-        const embed = new EmbedBuilder()
-          .setTitle(from[0].label + " made a transaction!")
-          .setURL("https://etherscan.io/tx/" + tran.transactionHash)
-          .setDescription(
-            "[" +
-              details[0].amount +
-              " " +
-              details[0].token +
-              " (" +
-              details[0].sym +
-              ") ](https://dexscreener.com/ethereum/" +
-              details[0].tokenAddress +
-              ")" +
-              "\n swapped for \n" +
+          //create embed of trasaction
+          const from = await Address.find({ address: tran.from.toLowerCase() });
+          const channel = client.channels.cache.get(config.CHANNELID);
+          const embed = new EmbedBuilder()
+            .setTitle(from[0].label + " made a transaction!")
+            .setURL("https://etherscan.io/tx/" + tran.transactionHash)
+            .setDescription(
               "[" +
-              details[1].amount +
-              " " +
-              details[1].token +
-              " (" +
-              details[1].sym +
-              ") ](https://dexscreener.com/ethereum/" +
-              details[1].tokenAddress +
-              ")"
-          );
+                details[0].amount +
+                " " +
+                details[0].token +
+                " (" +
+                details[0].sym +
+                ") ](https://dexscreener.com/ethereum/" +
+                details[0].tokenAddress +
+                ")" +
+                "\n swapped for \n" +
+                "[" +
+                details[1].amount +
+                " " +
+                details[1].token +
+                " (" +
+                details[1].sym +
+                ") ](https://dexscreener.com/ethereum/" +
+                details[1].tokenAddress +
+                ")"
+            );
 
-        channel.send({ embeds: [embed] });
-      } catch (error) {
-        console.log("wrong transaction type");
+          channel.send({ embeds: [embed] });
+        } catch (error) {
+          console.log(error);
+          console.log("wrong transaction type");
+        }
       }
+    } else if (tran.to == null) {
+      console.log("null address/new contract created");
     }
-  } else if (tran.to == null) {
-    console.log("null address/new contract created");
+  } catch (error) {
+    console.log("failed: " + transaction);
   }
 }
 
@@ -152,6 +128,7 @@ const transactions: string | any[] = [
   "0xbf6ee7d2156f9cdade1f5970a8a65362f2a34b33d59f44724067fd25b14f86b4",
   "0x41ee3c8a9329c70b8f32dacc7e8bb03fae926c5bca2eee84ece1bbb754ae73b3",
   "0x2afae7763487e60b893cb57803694810e6d3d136186a6de6719921afd7ca304a",
+  "0x0d1cbb7efa66202a541fbe5b768611a0009a8542dcabcd7c0ddeb07dd90c9724",
 ];
 export async function transactionTrackerTest(client: any) {
   console.log("tracker active");
