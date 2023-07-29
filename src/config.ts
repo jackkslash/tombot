@@ -5,6 +5,7 @@ const {
   GUILDID,
   DISCORDBOTTOKEN,
   CHANNELID,
+  PAIRCHANNEL,
   MONGODB,
   RPCURL1,
   RPCURL2,
@@ -16,6 +17,7 @@ if (
   !GUILDID ||
   !DISCORDBOTTOKEN ||
   !CHANNELID ||
+  !PAIRCHANNEL ||
   !MONGODB ||
   !RPCURL1 ||
   !RPCURL2 ||
@@ -29,6 +31,7 @@ const config: Record<string, string> = {
   GUILDID,
   DISCORDBOTTOKEN,
   CHANNELID,
+  PAIRCHANNEL,
   MONGODB,
   RPCURL1,
   RPCURL2,

@@ -122,16 +122,10 @@ async function logCheck(transaction: any, Addresses: any, client: any) {
   }
 }
 
-// test on hardcoded data
-const transactions: string | any[] = [
-  "0x8aee4d2e9df3d96202a41cb8b009f0b1d6d4d84ceb0ea9e3d8f2dfb171c5049c",
-  "0xbf6ee7d2156f9cdade1f5970a8a65362f2a34b33d59f44724067fd25b14f86b4",
-  "0x41ee3c8a9329c70b8f32dacc7e8bb03fae926c5bca2eee84ece1bbb754ae73b3",
-  "0x2afae7763487e60b893cb57803694810e6d3d136186a6de6719921afd7ca304a",
-  "0x0d1cbb7efa66202a541fbe5b768611a0009a8542dcabcd7c0ddeb07dd90c9724",
-];
+//tests a block with a confirmed transaction
 export async function transactionTrackerTest(client: any) {
   console.log("tracker active");
+  const blockNo = 17671938;
   const adds = await Address.aggregate([
     {
       $unwind: "$address",
@@ -147,10 +141,38 @@ export async function transactionTrackerTest(client: any) {
   ]);
   const Addresses = adds[0].address;
   try {
-    for (let index = 0; index < transactions.length; index++) {
-      logCheck(transactions[index], Addresses, client);
+    const block = await provider.getBlock(blockNo);
+    console.log(block.number);
+    for (const transaction of block.transactions) {
+      let t1 = performance.now();
+      logCheck(transaction, Addresses, client);
+      let t2 = performance.now();
+      let elapsed = t2 - t1;
+      const time = elapsed + " ms ";
+      console.log(time + "transaction:" + transaction);
     }
   } catch (error) {
     console.error(error);
   }
+  // const adds = await Address.aggregate([
+  //   {
+  //     $unwind: "$address",
+  //   },
+  //   {
+  //     $group: {
+  //       _id: null,
+  //       address: {
+  //         $addToSet: "$address",
+  //       },
+  //     },
+  //   },
+  // ]);
+  // const Addresses = adds[0].address;
+  // try {
+  //   for (let index = 0; index < transactions.length; index++) {
+  //     logCheck(transactions[index], Addresses, client);
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  // }
 }

@@ -5,7 +5,7 @@ import WebSocket from "ws";
 export function newPairSocket(client: any) {
   // Create WebSocket connection.
   const socket = new WebSocket("wss://ws.dextools.io/");
-  const channel = client.channels.cache.get(config.CHANNELID);
+  const channel = client.channels.cache.get(config.PAIRCHANNEL);
 
   const subscribe = {
     jsonrpc: "2.0",
