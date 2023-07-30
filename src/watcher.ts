@@ -33,6 +33,7 @@ export function transactionTracker(client: any) {
       console.log(block.number);
       for (const transaction of block.transactions) {
         logCheck(transaction, Addresses, client);
+        await sleep(500);
       }
     } catch (error) {
       console.error(error);
@@ -146,6 +147,7 @@ export async function transactionTrackerTest(client: any) {
     for (const transaction of block.transactions) {
       let t1 = performance.now();
       logCheck(transaction, Addresses, client);
+      await sleep(500);
       let t2 = performance.now();
       let elapsed = t2 - t1;
       const time = elapsed + " ms ";
@@ -154,25 +156,7 @@ export async function transactionTrackerTest(client: any) {
   } catch (error) {
     console.error(error);
   }
-  // const adds = await Address.aggregate([
-  //   {
-  //     $unwind: "$address",
-  //   },
-  //   {
-  //     $group: {
-  //       _id: null,
-  //       address: {
-  //         $addToSet: "$address",
-  //       },
-  //     },
-  //   },
-  // ]);
-  // const Addresses = adds[0].address;
-  // try {
-  //   for (let index = 0; index < transactions.length; index++) {
-  //     logCheck(transactions[index], Addresses, client);
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-  // }
 }
+
+const sleep = (delay: any) =>
+  new Promise((resolve) => setTimeout(resolve, delay));
