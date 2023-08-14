@@ -3,7 +3,6 @@ import config from "./config";
 import WebSocket from "ws";
 
 export function newPairSocket(client: any) {
-  // Create WebSocket connection.
   const socket = new WebSocket("wss://ws.dextools.io/");
   const channel = client.channels.cache.get(config.PAIRCHANNEL);
 
@@ -14,12 +13,10 @@ export function newPairSocket(client: any) {
     id: 2,
   };
 
-  // Connection opened
   socket.addEventListener("open", (event) => {
     socket.send(JSON.stringify(subscribe));
   });
 
-  // Listen for messages
   socket.addEventListener("message", async (event) => {
     const data = JSON.parse(event.data.toString());
     if (data.result.data.event == "create") {

@@ -91,7 +91,7 @@ async function logCheck(transaction: any, Addresses: any, client: any) {
               });
 
               const embed = new EmbedBuilder()
-                .setTitle(from[0].label + " made a transaction!")
+                .setTitle(from[0].label + " made a transaction on ethereum!")
                 .setURL("https://etherscan.io/tx/" + tran.transactionHash)
                 .setTimestamp();
               for (let index = 0; index < details.length; index++) {
@@ -217,5 +217,6 @@ export async function transactionTrackerTest(client: any) {
   }
 }
 
+//sleep function
 const sleep = (delay: any) =>
   new Promise((resolve) => setTimeout(resolve, delay));
