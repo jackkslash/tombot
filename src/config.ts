@@ -7,8 +7,6 @@ const {
   CHANNELID,
   PAIRCHANNEL,
   MONGODB,
-  RPCURL1,
-  RPCURL2,
   ALCAPI,
 } = process.env;
 
@@ -19,8 +17,6 @@ if (
   !CHANNELID ||
   !PAIRCHANNEL ||
   !MONGODB ||
-  !RPCURL1 ||
-  !RPCURL2 ||
   !ALCAPI
 ) {
   throw new Error("Missing .env vars");
@@ -33,8 +29,6 @@ const config: Record<string, string> = {
   CHANNELID,
   PAIRCHANNEL,
   MONGODB,
-  RPCURL1,
-  RPCURL2,
   ALCAPI,
 };
 
